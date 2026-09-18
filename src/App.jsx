@@ -1,10 +1,19 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Header from "./component/Header";
+import Game from "./pages/Game";
+import History from "./pages/History";
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-gray-800">
-        Stone Paper Scissors
-      </h1>
-    </div>
+    <BrowserRouter>
+      <Header />
+
+      <Routes>
+        <Route path="/" element={<Game />} />
+        <Route path="/history" element={<History />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
