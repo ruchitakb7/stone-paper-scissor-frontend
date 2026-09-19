@@ -2,9 +2,8 @@ import { Link } from "react-router-dom";
 
 function Header() {
   return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
+    <header className="sticky top-0 z-50 border-b bg-white shadow-sm">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link
           to="/"
           className="text-2xl font-bold text-indigo-600 no-underline"
@@ -12,18 +11,17 @@ function Header() {
           SPS Game
         </Link>
 
-        {/* Navigation */}
         <nav className="flex items-center gap-6">
           <Link
             to="/"
-            className="text-gray-700 hover:text-indigo-600 no-underline"
+            className="text-gray-700 no-underline hover:text-indigo-600"
           >
             🎮 Play Game
           </Link>
 
           <Link
             to="/history"
-            className="text-gray-700 hover:text-indigo-600 no-underline"
+            className="text-gray-700 no-underline hover:text-indigo-600"
           >
             📜 History
           </Link>

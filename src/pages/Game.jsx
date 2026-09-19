@@ -22,7 +22,7 @@ const choices = [
 ];
 
 const Game = () => {
- 
+
   const [screen, setScreen] = useState("lobby");
 
   const [mode, setMode] = useState("create");
@@ -141,9 +141,9 @@ const Game = () => {
         mode === "create"
           ? await createGame(playerName.trim())
           : await joinGame(
-              roomCodeInput.trim().toUpperCase(),
-              playerName.trim()
-            );
+            roomCodeInput.trim().toUpperCase(),
+            playerName.trim()
+          );
 
       setGameId(data.gameId);
       setRoomCode(data.roomCode);
@@ -173,7 +173,7 @@ const Game = () => {
     } catch (error) {
       setError(
         error.response?.data?.message ||
-          "Unable to create or join game"
+        "Unable to create or join game"
       );
     } finally {
       setLoading(false);
@@ -241,380 +241,390 @@ const Game = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-100 px-2 py-3">
-      <div className="mx-auto max-w-4xl">
+    <>
+      <div className="h-screen overflow-y-auto bg-gradient-to-br from-violet-50 via-white to-purple-100 px-2 py-3">
+        <div className="mx-auto max-w-4xl">
 
-        <div className="mb-4 text-center">
-          <h1 className="text-lg font-extrabold text-violet-700 sm:text-3xl">
-            Stone Paper Scissors
-          </h1>
+          <div className="mb-4 text-center">
+            <h1 className="text-lg font-extrabold text-violet-700 sm:text-3xl">
+              Stone Paper Scissors
+            </h1>
 
-          <p className="mt-1 text-xs text-gray-600">
-            Six rounds. One champion.
-          </p>
-        </div>
-
-        {error && (
-          <div className="mx-auto mb-3 max-w-sm rounded-xl bg-red-50 px-3 py-2 text-center text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
-        {screen === "lobby" && (
-          <div className="mx-auto max-w-sm rounded-xl bg-white p-4 shadow-xl sm:p-3">
-            <div className="mb-3 flex rounded-lg bg-violet-50 p-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("create");
-                  setError("");
-                }}
-                className={`w-1/2 rounded-lg px-3 py-2 font-semibold ${
-                  mode === "create"
-                    ? "bg-violet-600 text-white shadow"
-                    : "text-violet-700"
-                }`}
-              >
-                Create Game
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("join");
-                  setError("");
-                }}
-                className={`w-1/2 rounded-lg px-3 py-2 font-semibold ${
-                  mode === "join"
-                    ? "bg-violet-600 text-white shadow"
-                    : "text-violet-700"
-                }`}
-              >
-                Join Game
-              </button>
-            </div>
-
-            <h2 className="mb-1 text-center text-lg font-bold text-gray-800">
-              {mode === "create"
-                ? "Create a New Game"
-                : "Join a Game"}
-            </h2>
-
-            <p className="mb-3 text-center text-sm text-gray-500">
-              {mode === "create"
-                ? "Enter your name to create a room."
-                : "Enter your name and room code."}
+            <p className="mt-1 text-xs text-gray-600">
+              Six rounds. One champion.
             </p>
+          </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Your Name
-                </label>
+          {error && (
+            <div className="mx-auto mb-3 max-w-sm rounded-xl bg-red-50 px-3 py-2 text-center text-sm text-red-600">
+              {error}
+            </div>
+          )}
 
-                <input
-                  type="text"
-                  placeholder="Enter your name"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
-                  required
-                />
+          {screen === "lobby" && (
+            <div className="mx-auto max-w-sm rounded-xl bg-white p-4 shadow-xl sm:p-3">
+              <div className="mb-3 flex rounded-lg bg-violet-50 p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("create");
+                    setError("");
+                  }}
+                  className={`w-1/2 rounded-lg px-3 py-2 font-semibold ${mode === "create"
+                      ? "bg-violet-600 text-white shadow"
+                      : "text-violet-700"
+                    }`}
+                >
+                  Create Game
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("join");
+                    setError("");
+                  }}
+                  className={`w-1/2 rounded-lg px-3 py-2 font-semibold ${mode === "join"
+                      ? "bg-violet-600 text-white shadow"
+                      : "text-violet-700"
+                    }`}
+                >
+                  Join Game
+                </button>
               </div>
 
-              {mode === "join" && (
+              <h2 className="mb-1 text-center text-lg font-bold text-gray-800">
+                {mode === "create"
+                  ? "Create a New Game"
+                  : "Join a Game"}
+              </h2>
+
+              <p className="mb-3 text-center text-sm text-gray-500">
+                {mode === "create"
+                  ? "Enter your name to create a room."
+                  : "Enter your name and room code."}
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Room Code
+                    Your Name
                   </label>
 
                   <input
                     type="text"
-                    placeholder="Enter room code"
-                    value={roomCodeInput}
-                    onChange={(e) =>
-                      setRoomCodeInput(e.target.value.toUpperCase())
-                    }
-                    className="w-full rounded-xl border border-gray-300 px-3 py-2 uppercase tracking-widest outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+                    placeholder="Enter your name"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-2 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
                     required
                   />
                 </div>
-              )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-xl bg-violet-600 px-3 py-2 font-semibold text-white transition hover:bg-violet-700 disabled:opacity-60"
-              >
-                {loading
-                  ? "Please wait..."
-                  : mode === "create"
-                  ? "Create Game"
-                  : "Join Game"}
-              </button>
-            </form>
-          </div>
-        )}
+                {mode === "join" && (
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Room Code
+                    </label>
 
-        {screen === "waiting" && (
-          <div className="mx-auto max-w-md rounded-xl bg-white p-4 text-center shadow-xl">
-            <div className="mb-3 text-3xl">🎮</div>
+                    <input
+                      type="text"
+                      placeholder="Enter room code"
+                      value={roomCodeInput}
+                      onChange={(e) =>
+                        setRoomCodeInput(e.target.value.toUpperCase())
+                      }
+                      className="w-full rounded-xl border border-gray-300 px-3 py-2 uppercase tracking-widest outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+                      required
+                    />
+                  </div>
+                )}
 
-            <h2 className="text-lg font-bold text-gray-800">
-              Waiting for Opponent
-            </h2>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-xl bg-violet-600 px-3 py-2 font-semibold text-white transition hover:bg-violet-700 disabled:opacity-60"
+                >
+                  {loading
+                    ? "Please wait..."
+                    : mode === "create"
+                      ? "Create Game"
+                      : "Join Game"}
+                </button>
+              </form>
+            </div>
+          )}
 
-            <p className="mt-2 text-gray-500">
-              Share this room code with your opponent.
-            </p>
+          {screen === "waiting" && (
+            <div className="mx-auto max-w-md rounded-xl bg-white p-4 text-center shadow-xl">
+              <div className="mb-3 text-3xl">🎮</div>
 
-            <div className="my-3 rounded-2xl bg-violet-50 p-3">
-              <p className="text-sm text-violet-600">
-                Room Code
+              <h2 className="text-lg font-bold text-gray-800">
+                Waiting for Opponent
+              </h2>
+
+              <p className="mt-2 text-gray-500">
+                Share this room code with your opponent.
               </p>
 
-              <p className="mt-2 text-lg font-extrabold tracking-[0.3em] text-violet-700">
-                {roomCode}
-              </p>
-            </div>
+              <div className="my-3 rounded-2xl bg-violet-50 p-3">
+                <p className="text-sm text-violet-600">
+                  Room Code
+                </p>
 
-            <p className="text-gray-600">
-              Welcome, <strong>{playerName}</strong>
-            </p>
-
-            <div className="mt-3 flex items-center justify-center gap-2 text-sm text-gray-500">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-              Waiting for Player 2 to join...
-            </div>
-
-            <button
-              onClick={handleNewGame}
-              className="mt-3 rounded-xl border border-gray-300 px-5 py-2 text-sm text-gray-600 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-
-        {screen === "game" && (
-          <div className="space-y-3">
-  
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4 shadow-sm">
-              <div>
-                <p className="text-sm text-gray-500">Room Code</p>
-                <p className="font-bold tracking-widest text-violet-700">
+                <p className="mt-2 text-lg font-extrabold tracking-[0.3em] text-violet-700">
                   {roomCode}
                 </p>
               </div>
 
-              <div className="rounded-xl bg-violet-50 px-4 py-2 text-center">
-                <p className="text-xs text-violet-500">Round</p>
-                <p className="font-bold text-violet-700">
-                  {currentRound} / 6
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div className="rounded-2xl bg-violet-600 p-3 text-center text-white shadow-lg">
-                <p className="text-xs opacity-80">You</p>
-                <h3 className="mt-1 text-base font-bold">
-                  {me?.name || playerName}
-                </h3>
-                <p className="mt-3 text-lg font-extrabold">
-                  {myScore}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-gray-800 p-3 text-center text-white shadow-lg">
-                <p className="text-xs opacity-80">Opponent</p>
-                <h3 className="mt-1 text-base font-bold">
-                  {opponent?.name || "Waiting..."}
-                </h3>
-                <p className="mt-3 text-lg font-extrabold">
-                  {opponentScore}
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-xl bg-white p-4 text-center shadow-xl sm:p-3">
-              <h2 className="text-lg font-bold text-gray-800">
-                {roundResult
-                  ? "Round Result"
-                  : `Round ${currentRound}`}
-              </h2>
-
-              <p className="mt-2 text-gray-500">
-                {roundResult
-                  ? getWinnerText()
-                  : myChoice
-                  ? "Waiting for your opponent..."
-                  : "Choose your move"}
+              <p className="text-gray-600">
+                Welcome, <strong>{playerName}</strong>
               </p>
 
-              {!roundResult && (
-                <div className="mt-4 grid grid-cols-3 gap-3">
-                  {choices.map((choice) => (
-                    <button
-                      key={choice.value}
-                      type="button"
-                      disabled={Boolean(myChoice)}
-                      onClick={() => handleChoice(choice.value)}
-                      className={`rounded-xl border-2 p-2 transition sm:p-3 ${
-                        myChoice === choice.value
-                          ? "border-violet-600 bg-violet-100"
-                          : "border-gray-100 bg-gray-50 hover:border-violet-400 hover:bg-violet-50"
-                      } disabled:cursor-not-allowed disabled:opacity-60`}
-                    >
-                      <span className="text-lg sm:text-3xl">
-                        {choice.emoji}
-                      </span>
+              <div className="mt-3 flex items-center justify-center gap-2 text-sm text-gray-500">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                Waiting for Player 2 to join...
+              </div>
 
-                      <p className="mt-1 text-xs font-semibold text-gray-700">
-                        {choice.name}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <button
+                onClick={handleNewGame}
+                className="mt-3 rounded-xl border border-gray-300 px-5 py-2 text-sm text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
 
-              {myChoice && !roundResult && (
-                <div className="mt-3 rounded-xl bg-violet-50 p-4 text-sm text-violet-700">
-                  You selected{" "}
-                  <strong className="uppercase">
-                    {myChoice}
-                  </strong>
-                  . Waiting for your opponent...
-                </div>
-              )}
+          {screen === "game" && (
+            <div className="space-y-3">
 
-              {roundResult && (
-                <div className="mt-3 rounded-2xl bg-violet-50 p-4">
-                  <p className="text-3xl">
-                    {getWinnerText() === "You won this round!"
-                      ? "🏆"
-                      : getWinnerText() === "It's a tie!"
-                      ? "🤝"
-                      : "😔"}
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4 shadow-sm">
+                <div>
+                  <p className="text-sm text-gray-500">Room Code</p>
+                  <p className="font-bold tracking-widest text-violet-700">
+                    {roomCode}
                   </p>
+                </div>
 
-                  <p className="mt-3 font-semibold text-violet-700">
-                    {getWinnerText()}
+                <div className="rounded-xl bg-violet-50 px-4 py-2 text-center">
+                  <p className="text-xs text-violet-500">Round</p>
+                  <p className="font-bold text-violet-700">
+                    {currentRound} / 6
                   </p>
+                </div>
+              </div>
 
-                  <div className="mt-3 grid grid-cols-2 gap-3">
-                    <div className="rounded-lg bg-white p-2">
-                      <p className="text-xs text-gray-500">Your choice</p>
-                      <p className="mt-1 font-bold uppercase">
-                        {playerRole === "player1"
-                          ? roundResult.player1Choice
-                          : roundResult.player2Choice}
-                      </p>
-                    </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-2xl bg-violet-600 p-3 text-center text-white shadow-lg">
+                  <p className="text-xs opacity-80">You</p>
+                  <h3 className="mt-1 text-base font-bold">
+                    {me?.name || playerName}
+                  </h3>
+                  <p className="mt-3 text-lg font-extrabold">
+                    {myScore}
+                  </p>
+                </div>
 
-                    <div className="rounded-lg bg-white p-2">
-                      <p className="text-xs text-gray-500">
-                        Opponent's choice
-                      </p>
-                      <p className="mt-1 font-bold uppercase">
-                        {playerRole === "player1"
-                          ? roundResult.player2Choice
-                          : roundResult.player1Choice}
-                      </p>
-                    </div>
+                <div className="rounded-2xl bg-gray-800 p-3 text-center text-white shadow-lg">
+                  <p className="text-xs opacity-80">Opponent</p>
+                  <h3 className="mt-1 text-base font-bold">
+                    {opponent?.name || "Waiting..."}
+                  </h3>
+                  <p className="mt-3 text-lg font-extrabold">
+                    {opponentScore}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-white p-4 text-center shadow-xl sm:p-3">
+                <h2 className="text-lg font-bold text-gray-800">
+                  {roundResult
+                    ? "Round Result"
+                    : `Round ${currentRound}`}
+                </h2>
+
+                <p className="mt-2 text-gray-500">
+                  {roundResult
+                    ? getWinnerText()
+                    : myChoice
+                      ? "Waiting for your opponent..."
+                      : "Choose your move"}
+                </p>
+
+                {!roundResult && (
+                  <div className="mt-4 grid grid-cols-3 gap-3">
+                    {choices.map((choice) => (
+                      <button
+                        key={choice.value}
+                        type="button"
+                        disabled={Boolean(myChoice)}
+                        onClick={() => handleChoice(choice.value)}
+                        className={`rounded-xl border-2 p-2 transition sm:p-3 ${myChoice === choice.value
+                            ? "border-violet-600 bg-violet-100"
+                            : "border-gray-100 bg-gray-50 hover:border-violet-400 hover:bg-violet-50"
+                          } disabled:cursor-not-allowed disabled:opacity-60`}
+                      >
+                        <span className="text-lg sm:text-3xl">
+                          {choice.emoji}
+                        </span>
+
+                        <p className="mt-1 text-xs font-semibold text-gray-700">
+                          {choice.name}
+                        </p>
+                      </button>
+                    ))}
                   </div>
+                )}
 
-                  {currentRound < 6 && (
-                    <p className="mt-3 text-xs text-gray-500">
-                      Waiting for the next round...
+                {myChoice && !roundResult && (
+                  <div className="mt-3 rounded-xl bg-violet-50 p-4 text-sm text-violet-700">
+                    You selected{" "}
+                    <strong className="uppercase">
+                      {myChoice}
+                    </strong>
+                    . Waiting for your opponent...
+                  </div>
+                )}
+
+                {roundResult && (
+                  <div className="mt-3 rounded-2xl bg-violet-50 p-4">
+                    <p className="text-3xl">
+                      {getWinnerText() === "You won this round!"
+                        ? "🏆"
+                        : getWinnerText() === "It's a tie!"
+                          ? "🤝"
+                          : "😔"}
                     </p>
-                  )}
-                </div>
-              )}
 
-              {message && !roundResult && (
-                <p className="mt-3 text-xs text-gray-500">
-                  {message}
-                </p>
-              )}
-            </div>
+                    <p className="mt-3 font-semibold text-violet-700">
+                      {getWinnerText()}
+                    </p>
 
-            {roundHistory.length > 0 && (
-              <div className="rounded-2xl bg-white p-3 shadow-sm">
-                <h3 className="mb-2 text-sm font-bold text-gray-800">
-                  Round History
-                </h3>
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                      <div className="rounded-lg bg-white p-2">
+                        <p className="text-xs text-gray-500">Your choice</p>
+                        <p className="mt-1 font-bold uppercase">
+                          {playerRole === "player1"
+                            ? roundResult.player1Choice
+                            : roundResult.player2Choice}
+                        </p>
+                      </div>
 
-                <div className="space-y-1">
-                  {roundHistory.map((round, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 text-sm"
-                    >
-                      <span className="font-medium">
-                        Round {round.round}
-                      </span>
-
-                      <span className="text-gray-600">
-                        {round.winner === playerRole
-                          ? "You won"
-                          : round.winner === "tie"
-                          ? "Tie"
-                          : "Opponent won"}
-                      </span>
+                      <div className="rounded-lg bg-white p-2">
+                        <p className="text-xs text-gray-500">
+                          Opponent's choice
+                        </p>
+                        <p className="mt-1 font-bold uppercase">
+                          {playerRole === "player1"
+                            ? roundResult.player2Choice
+                            : roundResult.player1Choice}
+                        </p>
+                      </div>
                     </div>
-                  ))}
+
+                    {currentRound < 6 && (
+                      <p className="mt-3 text-xs text-gray-500">
+                        Waiting for the next round...
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {message && !roundResult && (
+                  <p className="mt-3 text-xs text-gray-500">
+                    {message}
+                  </p>
+                )}
+              </div>
+
+              {roundHistory.length > 0 && (
+                <div className="rounded-2xl bg-white p-3 shadow-sm">
+                  <h3 className="mb-2 text-sm font-bold text-gray-800">
+                    Round History
+                  </h3>
+
+                  <div className="space-y-1">
+                    {roundHistory.map((round, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 text-sm"
+                      >
+                        <span className="font-medium">
+                          Round {round.round}
+                        </span>
+
+                        <span className="text-gray-600">
+                          {round.winner === playerRole
+                            ? "You won"
+                            : round.winner === "tie"
+                              ? "Tie"
+                              : "Opponent won"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {screen === "completed" && (
+            <div className="mx-auto max-w-md rounded-xl bg-white p-4 text-center shadow-xl">
+              <div className="text-4xl">🏆</div>
+
+              <h2 className="mt-2 text-xl font-extrabold text-violet-700">
+                Game Completed!
+              </h2>
+
+              <p className="mt-3 text-gray-600">
+                {finalWinner === "tie"
+                  ? "The game ended in a tie!"
+                  : finalWinner === playerRole
+                    ? "Congratulations! You won!"
+                    : "Your opponent won the game."}
+              </p>
+
+              <div className="my-4 grid grid-cols-2 gap-2">
+                <div className="rounded-2xl bg-violet-50 p-3">
+                  <p className="text-sm text-gray-500">Your Score</p>
+                  <p className="mt-2 text-lg font-extrabold text-violet-700">
+                    {myScore}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-gray-100 p-3">
+                  <p className="text-sm text-gray-500">
+                    Opponent Score
+                  </p>
+                  <p className="mt-2 text-lg font-extrabold text-gray-800">
+                    {opponentScore}
+                  </p>
                 </div>
               </div>
-            )}
-          </div>
-        )}
 
-        {screen === "completed" && (
-          <div className="mx-auto max-w-md rounded-xl bg-white p-4 text-center shadow-xl">
-            <div className="text-4xl">🏆</div>
-
-            <h2 className="mt-2 text-xl font-extrabold text-violet-700">
-              Game Completed!
-            </h2>
-
-            <p className="mt-3 text-gray-600">
-              {finalWinner === "tie"
-                ? "The game ended in a tie!"
-                : finalWinner === playerRole
-                ? "Congratulations! You won!"
-                : "Your opponent won the game."}
-            </p>
-
-            <div className="my-4 grid grid-cols-2 gap-2">
-              <div className="rounded-2xl bg-violet-50 p-3">
-                <p className="text-sm text-gray-500">Your Score</p>
-                <p className="mt-2 text-lg font-extrabold text-violet-700">
-                  {myScore}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-gray-100 p-3">
-                <p className="text-sm text-gray-500">
-                  Opponent Score
-                </p>
-                <p className="mt-2 text-lg font-extrabold text-gray-800">
-                  {opponentScore}
-                </p>
-              </div>
+              <button
+                onClick={handleNewGame}
+                className="w-full rounded-xl bg-violet-600 px-3 py-2 font-semibold text-white hover:bg-violet-700"
+              >
+                Play Again
+              </button>
             </div>
+          )}
+        </div>
 
-            <button
-              onClick={handleNewGame}
-              className="w-full rounded-xl bg-violet-600 px-3 py-2 font-semibold text-white hover:bg-violet-700"
-            >
-              Play Again
-            </button>
-          </div>
-        )}
+        <div className="rounded-xl mt-10 border border-violet-200 bg-violet-50 px-3 py-3 text-center text-xs text-violet-800 sm:text-sm">
+          🎮 <strong>How to Play:</strong> Click on{" "}
+          <strong>Create Game</strong> to generate a unique Game ID. Share this ID
+          with your friend and ask them to join using the same ID. Once your friend
+          joins, you can start playing!
+        </div>
+
+
       </div>
-    </div>
-   
+
+
+    </>
+
   );
 };
 
