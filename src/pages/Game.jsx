@@ -42,7 +42,7 @@ const Game = () => {
   const [roundHistory, setRoundHistory] = useState([]);
   const [roundResult, setRoundResult] = useState(null);
   const [finalWinner, setFinalWinner] = useState(null);
-
+  const [showNextRound, setShowNextRound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -57,10 +57,16 @@ const Game = () => {
       setMessage("Both players are ready!");
     };
 
+    // const handlePlayerReady = (data) => {
+    //   if (data.playerId !== playerId) {
+    //     setOpponentReady(true);
+    //     setMessage("Your opponent has selected. Make your choice!");
+    //   }
+    // };
+
     const handlePlayerReady = (data) => {
       if (data.playerId !== playerId) {
         setOpponentReady(true);
-        setMessage("Your opponent has selected. Make your choice!");
       }
     };
 
@@ -83,14 +89,20 @@ const Game = () => {
       );
 
       setOpponentReady(false);
+      setShowNextRound(true);
+
+      setMessage("");
     };
 
     const handleNextRound = (data) => {
       setCurrentRound(data.round);
       setMyChoice("");
       setRoundResult(null);
+      setShowNextRound(false);
       setMessage(`Round ${data.round}: Make your choice!`);
     };
+
+   
 
     const handleGameCompleted = (data) => {
       setFinalWinner(data.winner);
@@ -218,6 +230,17 @@ const Game = () => {
     setMessage("");
   };
 
+  const handleNextRoundClick = () => {
+    if (!showNextRound) return;
+
+    socket.emit("request_next_round", {
+      roomCode,
+      playerId,
+    });
+
+    setShowNextRound(false);
+  };
+
   const me = players.find(
     (player) => player.playerId === playerId
   );
@@ -271,8 +294,8 @@ const Game = () => {
                     setError("");
                   }}
                   className={`w-1/2 rounded-lg px-3 py-2 font-semibold ${mode === "create"
-                      ? "bg-violet-600 text-white shadow"
-                      : "text-violet-700"
+                    ? "bg-violet-600 text-white shadow"
+                    : "text-violet-700"
                     }`}
                 >
                   Create Game
@@ -285,8 +308,8 @@ const Game = () => {
                     setError("");
                   }}
                   className={`w-1/2 rounded-lg px-3 py-2 font-semibold ${mode === "join"
-                      ? "bg-violet-600 text-white shadow"
-                      : "text-violet-700"
+                    ? "bg-violet-600 text-white shadow"
+                    : "text-violet-700"
                     }`}
                 >
                   Join Game
@@ -396,7 +419,7 @@ const Game = () => {
           )}
 
           {screen === "game" && (
-           <div className="mx-auto max-w-sm space-y-3">
+            <div className="mx-auto max-w-sm space-y-3">
 
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4 shadow-sm">
                 <div>
@@ -460,8 +483,8 @@ const Game = () => {
                         disabled={Boolean(myChoice)}
                         onClick={() => handleChoice(choice.value)}
                         className={`rounded-xl border-2 p-2 transition sm:p-3 ${myChoice === choice.value
-                            ? "border-violet-600 bg-violet-100"
-                            : "border-gray-100 bg-gray-50 hover:border-violet-400 hover:bg-violet-50"
+                          ? "border-violet-600 bg-violet-100"
+                          : "border-gray-100 bg-gray-50 hover:border-violet-400 hover:bg-violet-50"
                           } disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         <span className="text-lg sm:text-3xl">
@@ -487,54 +510,102 @@ const Game = () => {
                 )}
 
                 {roundResult && (
-                  <div className="mt-3 rounded-2xl bg-violet-50 p-4">
+                  <div className="mt-3 rounded-2xl bg-violet-50 p-4 text-center">
+
                     <p className="text-3xl">
-                      {getWinnerText() === "You won this round!"
-                        ? "🏆"
-                        : getWinnerText() === "It's a tie!"
-                          ? "🤝"
+                      {roundResult.winner === "tie"
+                        ? "🤝"
+                        : roundResult.winner === playerRole
+                          ? "🏆"
                           : "😔"}
                     </p>
 
-                    <p className="mt-3 font-semibold text-violet-700">
-                      {getWinnerText()}
+                    <h3 className="mt-2 text-lg font-extrabold text-violet-700">
+                      {roundResult.winner === "tie"
+                        ? "It's a Tie!"
+                        : roundResult.winner === playerRole
+                          ? "🎉 Congratulations! You Won!"
+                          : "Your Opponent Won!"}
+                    </h3>
+
+                    <p className="mt-1 text-sm text-gray-600">
+                      Round {roundResult.round} Result
                     </p>
 
-                    <div className="mt-3 grid grid-cols-2 gap-3">
-                      <div className="rounded-lg bg-white p-2">
-                        <p className="text-xs text-gray-500">Your choice</p>
-                        <p className="mt-1 font-bold uppercase">
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+
+                      <div className="rounded-xl bg-white p-3 shadow-sm">
+                        <p className="text-xs text-gray-500">
+                          {me?.name || playerName}
+                        </p>
+
+                        <p className="mt-2 text-xs text-gray-500">
+                          Selected
+                        </p>
+
+                        <p className="mt-1 text-lg font-bold uppercase">
                           {playerRole === "player1"
                             ? roundResult.player1Choice
                             : roundResult.player2Choice}
                         </p>
                       </div>
 
-                      <div className="rounded-lg bg-white p-2">
+                      <div className="rounded-xl bg-white p-3 shadow-sm">
                         <p className="text-xs text-gray-500">
-                          Opponent's choice
+                          {opponent?.name || "Opponent"}
                         </p>
-                        <p className="mt-1 font-bold uppercase">
+
+                        <p className="mt-2 text-xs text-gray-500">
+                          Selected
+                        </p>
+
+                        <p className="mt-1 text-lg font-bold uppercase">
                           {playerRole === "player1"
                             ? roundResult.player2Choice
                             : roundResult.player1Choice}
                         </p>
                       </div>
+
+                    </div>
+
+                    <div className="mt-4 rounded-xl bg-white p-3">
+                      <p className="text-sm text-gray-500">
+                        Current Score
+                      </p>
+
+                      <p className="mt-1 text-lg font-bold text-violet-700">
+                        {myScore} - {opponentScore}
+                      </p>
                     </div>
 
                     {currentRound < 6 && (
-                      <p className="mt-3 text-xs text-gray-500">
-                        Waiting for the next round...
+                      <button
+                        type="button"
+                        onClick={handleNextRoundClick}
+                        className="mt-4 w-full rounded-xl bg-violet-600 px-4 py-3 font-bold text-white hover:bg-violet-700"
+                      >
+                        Next Round →
+                      </button>
+                    )}
+
+                    {currentRound === 6 && (
+                      <p className="mt-4 font-semibold text-gray-700">
+                        Final round completed! 🎊
                       </p>
                     )}
+
                   </div>
                 )}
 
-                {message && !roundResult && (
-                  <p className="mt-3 text-xs text-gray-500">
-                    {message}
-                  </p>
+                {message && !roundResult && !myChoice && (
+                  <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-center shadow-sm">
+                    <p className="text-sm font-medium text-blue-700">
+                      {message}
+                    </p>
+                  </div>
                 )}
+
+               
               </div>
 
               {roundHistory.length > 0 && (
