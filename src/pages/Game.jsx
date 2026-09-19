@@ -396,7 +396,7 @@ const Game = () => {
           )}
 
           {screen === "game" && (
-            <div className="space-y-3">
+           <div className="mx-auto max-w-sm space-y-3">
 
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4 shadow-sm">
                 <div>
@@ -415,29 +415,29 @@ const Game = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-2xl bg-violet-600 p-3 text-center text-white shadow-lg">
+                <div className="rounded-xl bg-violet-400 p-1 text-center text-white shadow-sm">
                   <p className="text-xs opacity-80">You</p>
                   <h3 className="mt-1 text-base font-bold">
                     {me?.name || playerName}
                   </h3>
-                  <p className="mt-3 text-lg font-extrabold">
+                  <p className="mt-1 text-lg font-extrabold">
                     {myScore}
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-gray-800 p-3 text-center text-white shadow-lg">
+                <div className="rounded-xl bg-gray-800 p-1 text-center text-white shadow-sm">
                   <p className="text-xs opacity-80">Opponent</p>
                   <h3 className="mt-1 text-base font-bold">
                     {opponent?.name || "Waiting..."}
                   </h3>
-                  <p className="mt-3 text-lg font-extrabold">
+                  <p className="mt-1 text-lg font-extrabold">
                     {opponentScore}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-xl bg-white p-4 text-center shadow-xl sm:p-3">
-                <h2 className="text-lg font-bold text-gray-800">
+              <div className="rounded-xl bg-white p-2 text-center shadow-xl sm:p-3">
+                <h2 className="text-sm font-bold text-gray-800">
                   {roundResult
                     ? "Round Result"
                     : `Round ${currentRound}`}
@@ -452,7 +452,7 @@ const Game = () => {
                 </p>
 
                 {!roundResult && (
-                  <div className="mt-4 grid grid-cols-3 gap-3">
+                  <div className="mt-2 grid grid-cols-3 gap-3">
                     {choices.map((choice) => (
                       <button
                         key={choice.value}
