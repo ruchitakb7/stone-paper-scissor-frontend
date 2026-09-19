@@ -102,7 +102,7 @@ const Game = () => {
       setMessage(`Round ${data.round}: Make your choice!`);
     };
 
-   
+
 
     const handleGameCompleted = (data) => {
       setFinalWinner(data.winner);
@@ -248,6 +248,11 @@ const Game = () => {
   const opponent = players.find(
     (player) => player.playerId !== playerId
   );
+
+  const canChoose =
+    !myChoice &&
+    !roundResult &&
+    (playerRole === "player1" || opponentReady);
 
   const getWinnerText = () => {
     if (!roundResult) return "";
@@ -466,25 +471,31 @@ const Game = () => {
                     : `Round ${currentRound}`}
                 </h2>
 
+             
+
                 <p className="mt-2 text-gray-500">
                   {roundResult
                     ? getWinnerText()
                     : myChoice
                       ? "Waiting for your opponent..."
-                      : "Choose your move"}
+                      : playerRole === "player2" && !opponentReady
+                        ? "Waiting for Player 1 to select..."
+                        : "Choose your move"}
                 </p>
 
                 {!roundResult && (
                   <div className="mt-2 grid grid-cols-3 gap-3">
                     {choices.map((choice) => (
+                     
+
                       <button
                         key={choice.value}
                         type="button"
-                        disabled={Boolean(myChoice)}
+                        disabled={!canChoose}
                         onClick={() => handleChoice(choice.value)}
                         className={`rounded-xl border-2 p-2 transition sm:p-3 ${myChoice === choice.value
-                          ? "border-violet-600 bg-violet-100"
-                          : "border-gray-100 bg-gray-50 hover:border-violet-400 hover:bg-violet-50"
+                            ? "border-violet-600 bg-violet-100"
+                            : "border-gray-100 bg-gray-50 hover:border-violet-400 hover:bg-violet-50"
                           } disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         <span className="text-lg sm:text-3xl">
@@ -605,7 +616,7 @@ const Game = () => {
                   </div>
                 )}
 
-               
+
               </div>
 
               {roundHistory.length > 0 && (
