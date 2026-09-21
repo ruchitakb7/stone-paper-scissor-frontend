@@ -1,7 +1,82 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import socket from "../util/socket.js";
 import { createGame, joinGame } from "../service/gameservice.js";
+
+const initialState = {
+  screen: "lobby",
+  mode: "create",
+  playerName: "",
+  roomCodeInput: "",
+
+  gameId: "",
+  roomCode: "",
+  playerId: "",
+  playerRole: "",
+  players: [],
+
+  currentRound: 1,
+  myChoice: "",
+  opponentReady: false,
+
+  myScore: 0,
+  opponentScore: 0,
+  roundHistory: [],
+  roundResult: null,
+  finalWinner: null,
+  showNextRound: false,
+
+  loading: false,
+  error: "",
+  message: "",
+};
+
+function gameReducer(state, action) {
+  switch (action.type) {
+    case "SET_FIELD":
+      return {
+        ...state,
+        [action.field]: action.value,
+      };
+
+    case "SET_MULTIPLE_FIELDS":
+      return {
+        ...state,
+        ...action.payload,
+      };
+
+    case "ADD_ROUND_RESULT":
+      return {
+        ...state,
+        roundResult: action.payload.data,
+        roundHistory: [
+          ...state.roundHistory,
+          action.payload.data,
+        ],
+        myScore: action.payload.myScore,
+        opponentScore: action.payload.opponentScore,
+        opponentReady: false,
+        showNextRound: true,
+        message: "",
+      };
+
+    case "RESET_ROUND":
+      return {
+        ...state,
+        currentRound: action.payload.round,
+        myChoice: "",
+        roundResult: null,
+        showNextRound: false,
+        message: `Round ${action.payload.round}: Make your choice!`,
+      };
+
+    case "RESET_GAME":
+      return initialState;
+
+    default:
+      return state;
+  }
+}
 
 const choices = [
   {
@@ -23,94 +98,91 @@ const choices = [
 
 const Game = () => {
 
-  const [screen, setScreen] = useState("lobby");
-
-  const [mode, setMode] = useState("create");
-  const [playerName, setPlayerName] = useState("");
-  const [roomCodeInput, setRoomCodeInput] = useState("");
-
-  const [gameId, setGameId] = useState("");
-  const [roomCode, setRoomCode] = useState("");
-  const [playerId, setPlayerId] = useState("");
-  const [playerRole, setPlayerRole] = useState("");
-  const [players, setPlayers] = useState([]);
-  const [currentRound, setCurrentRound] = useState(1);
-  const [myChoice, setMyChoice] = useState("");
-  const [opponentReady, setOpponentReady] = useState(false);
-  const [myScore, setMyScore] = useState(0);
-  const [opponentScore, setOpponentScore] = useState(0);
-  const [roundHistory, setRoundHistory] = useState([]);
-  const [roundResult, setRoundResult] = useState(null);
-  const [finalWinner, setFinalWinner] = useState(null);
-  const [showNextRound, setShowNextRound] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [state, dispatch] = useReducer(gameReducer, initialState);
+  const {
+    screen,
+    mode,
+    playerName,
+    roomCodeInput,
+    roomCode,
+    playerId,
+    playerRole,
+    currentRound,
+    myChoice,
+    opponentReady,
+    myScore,
+    opponentScore,
+    roundHistory,
+    roundResult,
+    finalWinner,
+    showNextRound,
+    loading,
+    error,
+    message,
+  } = state;
 
   useEffect(() => {
     const handlePlayerJoined = (data) => {
-      if (data.players) {
-        setPlayers(data.players);
-      }
-
-      setScreen("game");
-      setMessage("Both players are ready!");
+      dispatch({
+        type: "SET_MULTIPLE_FIELDS",
+        payload: {
+          ...(data.players && { players: data.players }),
+          screen: "game",
+          message: "Both players are ready!",
+        },
+      });
     };
 
-    // const handlePlayerReady = (data) => {
-    //   if (data.playerId !== playerId) {
-    //     setOpponentReady(true);
-    //     setMessage("Your opponent has selected. Make your choice!");
-    //   }
-    // };
-
     const handlePlayerReady = (data) => {
-      if (data.playerId !== playerId) {
-        setOpponentReady(true);
+      if (data.playerId !== state.playerId) {
+        dispatch({
+          type: "SET_FIELD",
+          field: "opponentReady",
+          value: true,
+        });
       }
     };
 
     const handleRoundResult = (data) => {
-      setRoundResult(data);
+      const isPlayer1 = state.playerRole === "player1";
 
-      setRoundHistory((previous) => [
-        ...previous,
-        data,
-      ]);
-
-      const isPlayer1 = playerRole === "player1";
-
-      setMyScore(
-        isPlayer1 ? data.player1Score : data.player2Score
-      );
-
-      setOpponentScore(
-        isPlayer1 ? data.player2Score : data.player1Score
-      );
-
-      setOpponentReady(false);
-      setShowNextRound(true);
-
-      setMessage("");
+      dispatch({
+        type: "ADD_ROUND_RESULT",
+        payload: {
+          data,
+          myScore: isPlayer1 ? data.player1Score : data.player2Score,
+          opponentScore: isPlayer1
+            ? data.player2Score
+            : data.player1Score,
+        },
+      });
     };
 
     const handleNextRound = (data) => {
-      setCurrentRound(data.round);
-      setMyChoice("");
-      setRoundResult(null);
-      setShowNextRound(false);
-      setMessage(`Round ${data.round}: Make your choice!`);
+      dispatch({
+        type: "RESET_ROUND",
+        payload: {
+          round: data.round,
+        },
+      });
     };
 
-
-
     const handleGameCompleted = (data) => {
-      setFinalWinner(data.winner);
-      setScreen("completed");
+      dispatch({
+        type: "SET_MULTIPLE_FIELDS",
+        payload: {
+          finalWinner: data.winner,
+          screen: "completed",
+        },
+      });
     };
 
     const handleSocketError = (data) => {
-      setError(data.message || "Something went wrong");
+      dispatch({
+        type: "SET_FIELD",
+        field: "error",
+        value: data.message || "Something went wrong",
+      });
     };
 
     socket.on("player_joined", handlePlayerJoined);
@@ -128,26 +200,36 @@ const Game = () => {
       socket.off("game_completed", handleGameCompleted);
       socket.off("game_error", handleSocketError);
     };
-  }, [playerId, playerRole]);
+  }, [state.playerId, state.playerRole]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setError("");
-    setMessage("");
+    dispatch({
+      type: "SET_MULTIPLE_FIELDS",
+      payload: { error: "", message: "" },
+    });
 
     if (!playerName.trim()) {
-      setError("Please enter your name");
+      dispatch({
+        type: "SET_FIELD",
+        field: "error",
+        value: "Please enter your name",
+      });
       return;
     }
 
     if (mode === "join" && !roomCodeInput.trim()) {
-      setError("Please enter a room code");
+      dispatch({
+        type: "SET_FIELD",
+        field: "error",
+        value: "Please enter a room code",
+      });
       return;
     }
 
     try {
-      setLoading(true);
+      dispatch({ type: "SET_FIELD", field: "loading", value: true });
 
       const data =
         mode === "create"
@@ -157,20 +239,23 @@ const Game = () => {
             playerName.trim()
           );
 
-      setGameId(data.gameId);
-      setRoomCode(data.roomCode);
-      setPlayerId(data.playerId);
-      setPlayerRole(data.playerRole);
-
-      setPlayers([
-        {
+      dispatch({
+        type: "SET_MULTIPLE_FIELDS",
+        payload: {
+          gameId: data.gameId,
+          roomCode: data.roomCode,
           playerId: data.playerId,
-          name: playerName.trim(),
-          role: data.playerRole,
+          playerRole: data.playerRole,
+          players: [
+            {
+              playerId: data.playerId,
+              name: playerName.trim(),
+              role: data.playerRole,
+            },
+          ],
+          screen: "waiting",
         },
-      ]);
-
-      setScreen("waiting");
+      });
 
       if (!socket.connected) {
         socket.connect();
@@ -183,51 +268,38 @@ const Game = () => {
         playerRole: data.playerRole,
       });
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-        "Unable to create or join game"
-      );
+      dispatch({
+        type: "SET_FIELD",
+        field: "error",
+        value: error.response?.data?.message || "Unable to create or join game",
+      });
     } finally {
-      setLoading(false);
+      dispatch({ type: "SET_FIELD", field: "loading", value: false });
     }
   };
 
-  // Submit Stone, Paper, or Scissors
   const handleChoice = (choice) => {
-    if (myChoice || roundResult) return;
+    if (state.myChoice || state.roundResult) return;
 
-    setMyChoice(choice);
-    setMessage("Waiting for your opponent...");
+    dispatch({
+      type: "SET_MULTIPLE_FIELDS",
+      payload: {
+        myChoice: choice,
+        message: "Waiting for your opponent...",
+      },
+    });
 
     socket.emit("submit_choice", {
-      roomCode,
-      playerId,
+      roomCode: state.roomCode,
+      playerId: state.playerId,
       choice,
     });
   };
 
+
   const handleNewGame = () => {
     socket.disconnect();
-
-    setScreen("lobby");
-    setMode("create");
-    setPlayerName("");
-    setRoomCodeInput("");
-    setGameId("");
-    setRoomCode("");
-    setPlayerId("");
-    setPlayerRole("");
-    setPlayers([]);
-    setCurrentRound(1);
-    setMyChoice("");
-    setOpponentReady(false);
-    setMyScore(0);
-    setOpponentScore(0);
-    setRoundHistory([]);
-    setRoundResult(null);
-    setFinalWinner(null);
-    setError("");
-    setMessage("");
+    dispatch({ type: "RESET_GAME" });
   };
 
   const handleNextRoundClick = () => {
@@ -238,30 +310,31 @@ const Game = () => {
       playerId,
     });
 
-    setShowNextRound(false);
+    dispatch({
+      type: "SET_FIELD",
+      field: "showNextRound",
+      value: false,
+    });
   };
 
-  const me = players.find(
-    (player) => player.playerId === playerId
+  const me = state.players.find(
+    (player) => player.playerId === state.playerId
   );
 
-  const opponent = players.find(
-    (player) => player.playerId !== playerId
+  const opponent = state.players.find(
+    (player) => player.playerId !== state.playerId
   );
 
-  const canChoose =
-    !myChoice &&
-    !roundResult &&
-    (playerRole === "player1" || opponentReady);
+  const canChoose = !state.myChoice && !state.roundResult && (state.playerRole === "player1" || state.opponentReady);
 
   const getWinnerText = () => {
-    if (!roundResult) return "";
+    if (!state.roundResult) return "";
 
-    if (roundResult.winner === "tie") {
+    if (state.roundResult.winner === "tie") {
       return "It's a tie!";
     }
 
-    if (roundResult.winner === playerRole) {
+    if (state.roundResult.winner === state.playerRole) {
       return "You won this round!";
     }
 
@@ -289,14 +362,16 @@ const Game = () => {
             </div>
           )}
 
-          {screen === "lobby" && (
+          {state.screen === "lobby" && (
             <div className="mx-auto max-w-sm rounded-xl bg-white p-4 shadow-xl sm:p-3">
               <div className="mb-3 flex rounded-lg bg-violet-50 p-1">
                 <button
                   type="button"
                   onClick={() => {
-                    setMode("create");
-                    setError("");
+                    dispatch({
+                      type: "SET_MULTIPLE_FIELDS",
+                      payload: { mode: "create", error: "" },
+                    });
                   }}
                   className={`w-1/2 rounded-lg px-3 py-2 font-semibold ${mode === "create"
                     ? "bg-violet-600 text-white shadow"
@@ -309,8 +384,10 @@ const Game = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setMode("join");
-                    setError("");
+                    dispatch({
+                      type: "SET_MULTIPLE_FIELDS",
+                      payload: { mode: "join", error: "" },
+                    });
                   }}
                   className={`w-1/2 rounded-lg px-3 py-2 font-semibold ${mode === "join"
                     ? "bg-violet-600 text-white shadow"
@@ -342,14 +419,20 @@ const Game = () => {
                   <input
                     type="text"
                     placeholder="Enter your name"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
+                    value={state.playerName}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "SET_FIELD",
+                        field: "playerName",
+                        value: e.target.value,
+                      })
+                    }
                     className="w-full rounded-xl border border-gray-300 px-3 py-2 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
                     required
                   />
                 </div>
 
-                {mode === "join" && (
+                {state.mode === "join" && (
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700">
                       Room Code
@@ -358,9 +441,13 @@ const Game = () => {
                     <input
                       type="text"
                       placeholder="Enter room code"
-                      value={roomCodeInput}
+                      value={state.roomCodeInput}
                       onChange={(e) =>
-                        setRoomCodeInput(e.target.value.toUpperCase())
+                        dispatch({
+                          type: "SET_FIELD",
+                          field: "roomCodeInput",
+                          value: e.target.value.toUpperCase(),
+                        })
                       }
                       className="w-full rounded-xl border border-gray-300 px-3 py-2 uppercase tracking-widest outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
                       required
@@ -383,7 +470,7 @@ const Game = () => {
             </div>
           )}
 
-          {screen === "waiting" && (
+          {state.screen === "waiting" && (
             <div className="mx-auto max-w-md rounded-xl bg-white p-4 text-center shadow-xl">
               <div className="mb-3 text-3xl">🎮</div>
 
@@ -423,7 +510,7 @@ const Game = () => {
             </div>
           )}
 
-          {screen === "game" && (
+          {state.screen === "game" && (
             <div className="mx-auto max-w-sm space-y-3">
 
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4 shadow-sm">
@@ -468,10 +555,10 @@ const Game = () => {
                 <h2 className="text-sm font-bold text-gray-800">
                   {roundResult
                     ? "Round Result"
-                    : `Round ${currentRound}`}
+                    : `Round ${state.currentRound}`}
                 </h2>
 
-             
+
 
                 <p className="mt-2 text-gray-500">
                   {roundResult
@@ -486,7 +573,7 @@ const Game = () => {
                 {!roundResult && (
                   <div className="mt-2 grid grid-cols-3 gap-3">
                     {choices.map((choice) => (
-                     
+
 
                       <button
                         key={choice.value}
@@ -494,8 +581,8 @@ const Game = () => {
                         disabled={!canChoose}
                         onClick={() => handleChoice(choice.value)}
                         className={`rounded-xl border-2 p-2 transition sm:p-3 ${myChoice === choice.value
-                            ? "border-violet-600 bg-violet-100"
-                            : "border-gray-100 bg-gray-50 hover:border-violet-400 hover:bg-violet-50"
+                          ? "border-violet-600 bg-violet-100"
+                          : "border-gray-100 bg-gray-50 hover:border-violet-400 hover:bg-violet-50"
                           } disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         <span className="text-lg sm:text-3xl">
